@@ -104,6 +104,12 @@ public class PeliSolmu {
     }
     
     public int solmujaTasossaKeskimäärin(){
-        return solmujaYhteensä() / lapsellisiaSolmuja();
+        int lapsellisia = lapsellisiaSolmuja();
+        
+        if(lapsellisia == 0){
+            return 0;
+        }else{
+            return solmujaYhteensä() / lapsellisiaSolmuja();
+        }
     }
 }

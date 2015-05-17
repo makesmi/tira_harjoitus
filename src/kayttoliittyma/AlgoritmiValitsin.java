@@ -37,12 +37,12 @@ public class AlgoritmiValitsin extends JPanel{
         tutkimusAlgoritmit.put("alfabeta", syvyys -> new MinMaxAlfaBetaTutkimus(syvyys));
         hakuAlgoritmit.put("alfabeta", syvyys -> new MinMaxAlfaBeta(syvyys));
         algoritmiKompo.addItem("alfabeta");
-        algoritmiKompo.setSelectedItem("minmax");
+        algoritmiKompo.setSelectedItem("alfabeta");
 
         for(int syvyys = pieninSyvyys; syvyys <= suurinSyvyys; syvyys++){
             syvyysKompo.addItem(syvyys);
         }
-        syvyysKompo.setSelectedItem(3);
+        syvyysKompo.setSelectedItem(5);
     }
     
     private int syvyys(){

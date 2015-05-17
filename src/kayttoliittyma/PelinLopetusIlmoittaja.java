@@ -10,7 +10,7 @@ import pelinydin.ShakkiSiirto;
 
 /**
  *
- * @author Markus
+ * @author Markus M
  */
 public class PelinLopetusIlmoittaja implements Pelaaja{
 

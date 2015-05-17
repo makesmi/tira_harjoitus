@@ -30,7 +30,6 @@ public class PelinOhjaus {
     private final LoppuTarkistus tarkistus;
     private final List<Pelaaja> katsojat;
     private boolean peliKäynnissä;
-            
     
     /**
      * Luo shakkipelin ja asettaa sille pelaajat. Laudalle asetetaan shakin virallinen alkuasetelma.
@@ -116,21 +115,48 @@ public class PelinOhjaus {
      * jotta pelaajan eivät voi tehdä pelin lautaan muutoksia käsin.
      * Jokaiselle pelaajalle ja katsojalle tehdään eri kopio laudasta.
      * Samoin pelin loppumisesta ilmoitetaan kutsumalla pelinLoppu-metodia.
+     * Pelin loppuminen voi tapahtua pysäyttämällä ulkopuolelta käsin sillä aikaa,
+     * kun joltain pelaajalta ollaan kysymässä siirtoa.
+     * Pelaajien peliTilanMuutos-metodia ei kutsuta koskaan pelinLoppu-metodin kutsumisen jälkeen.
      */
     public void pelaa(){
         peliKäynnissä = true;
        while(!tarkistus.peliPäättynyt()){
            kerroMuutoksestaPelaajille();
-           siirto();       
+           siirto();
        }
-       
-       kerroMuutoksestaPelaajille();
-       kerroLoppumisestaPelaajille();
-       peliKäynnissä = false;
+                   
+       if(peliKäynnissä){
+           kerroMuutoksestaPelaajille();
+           pelinLoppu();
+       }
     }
+    
+    /**
+     * Kertoo, onko peli tällä hetkellä käynnissä vai päättynyt.
+     * @return 
+     */
     
     public boolean peliKäynnissä(){
         return peliKäynnissä;
+    }
+    
+    /**
+     * Merkitään peli päättyneeksi tasapeliin.
+     * Tätä voi kutsua samaan aikaan, kun pelaa()-metodin suoritus on kesken.
+     * Pelaajien pelinLoppu-metodia kutsutaan, jotta ne tietävät lopettaa
+     * mahdollisen siirron odottamisen tai laskemisen.
+     */
+    public void pysäytäPeli(){
+        tarkistus.tasaPeli();
+        pelinLoppu();
+    }
+        
+    private void pelinLoppu(){
+        if(peliKäynnissä){
+            peliKäynnissä = false;
+            kerroLoppumisestaPelaajille();
+        }
     }
     
     private void siirto(){
@@ -141,7 +167,9 @@ public class PelinOhjaus {
         
             ShakkiSiirto siirto = pelaaja.pyydäSiirto(hyväksytty);
             
-            if(siirto == null){
+            if(!peliKäynnissä){
+                return;
+            }else if(siirto == null){
                 break;
             }else if(siirtoTarkistus.onkoLaillinen(siirto)){
                 peli.teeSiirto(siirto);

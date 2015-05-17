@@ -13,7 +13,10 @@ import pelinydin.ShakkiSiirto;
 import pelinydin.Väri;
 import static pelinydin.NappulaTyyppi.*;
 
-
+/**
+ * 
+ * @author Markus M
+ */
 
 
 public class SiirtojenGenerointi{
@@ -22,6 +25,16 @@ public class SiirtojenGenerointi{
     private static ShakkiLauta lauta;
     private static boolean siirtäjä;
     private static List<ShakkiSiirto> siirrot;
+    
+    /**
+     * Palauttaa listan kaikista mahdollisista siirroista,
+     * joita tällä hetkellä vuorossa oleva pelaaja voi tehdä.
+     * Listassa voi olla möys laittomia siirtoja
+     * oman kuninkaan joutuessa uhatuksi tai linnoitusruutujen ollessa uhattuna.
+     * @param lauta
+     * @param tila
+     * @return 
+     */
     
     public static List<ShakkiSiirto> haeSiirrot(ShakkiLauta lauta, PeliTila tila){
         siirrot = new LinkedList<>();
@@ -180,13 +193,23 @@ public class SiirtojenGenerointi{
             if(lauta.haeRuutu(x, kohdeY) != null){
                 break;
             }
-        }    
+        }
+        
     }
     
     private static void kuningatarSiirrot(int x, int y){
         lähettiSiirrot(x, y);
         torniSiirrot(x, y);
     }
+    
+    /**
+     * kuningas voi liikkua yhden ruudun joka suuntaan,
+     * eli kahdeksaan ympärillään olevaan ruutuun.
+     * Lisäksi kuningas voi tehdä linnoituksen joko kuningas- tai kuningatarpuolelle.
+     * 
+     * @param x
+     * @param y 
+     */
     
     private static void kuningasSiirrot(int x, int y){
         siirrot.add(new ShakkiSiirto(x, y, x - 1, y));
@@ -219,6 +242,11 @@ public class SiirtojenGenerointi{
             }
         }
     }
+    
+    /**
+     * Poistaa laudan ulkopuolella olevat siirrot, 
+     * sekä siirrot oman nappulan päälle.
+     */
     
     private static void poistaLaittomat(){
         List<ShakkiSiirto> poistettavat = new LinkedList<>();

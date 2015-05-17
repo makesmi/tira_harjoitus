@@ -9,6 +9,10 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Stream;
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -27,7 +31,10 @@ import tekoaly.TekoÄly;
 
 public class KayttoLiittyma extends JFrame implements ActionListener{
 
+    private static final double satunnaisuus = 0.5;
+    
     private PeliLauta lauta;
+    private PeliTilaPaneeli peliTilaPaneeli;
     private PelaajaLiittymä käyttäjä;
     private TekoÄly tekoÄly;
 
@@ -37,14 +44,17 @@ public class KayttoLiittyma extends JFrame implements ActionListener{
     private final JRadioButton tekoÄlyTekoÄly = new JRadioButton("tekoäly vs tekoäly");
     private final AlgoritmiValitsin valitsin = new AlgoritmiValitsin();
     private HakuPuuSelaaja tutkimusIkkuna = null;
+    private Map<String, Runnable> komennot;
+    private String[] komennotJärjestyksessä;
     
     public KayttoLiittyma(){
         setVisible(true);
-        setTitle("ShakkiTekoäly");
+        setTitle("PeliLauta");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(720, 720);
+        setSize(700, 700);
         setLocation(200, 50);
         
+        luoKomennot();
         lauta = new PeliLauta();
         lauta.päivitäLauta(AloitusAsetelma.haeLauta(), AloitusAsetelma.haeTila());
         lauta.asetaVäri(Väri.VALKOINEN);
@@ -52,22 +62,23 @@ public class KayttoLiittyma extends JFrame implements ActionListener{
         add(lauta);
         validate();
         luoOhjausIkkuna();
-        käyttäjä = new PelaajaLiittymä(lauta);
-        
+        käyttäjä = new PelaajaLiittymä(lauta, peliTilaPaneeli);
     }
 
     
-    private void luoSiirtoKuuntelija(){
-        lauta.asetaSiirtoKuuntelija(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(!onkoPeliKäynnissä()){
-                    
-                }
-            }
-        });
+    private void luoKomennot(){
+        komennot = new TreeMap<>();
+        komennot.put("pelaa", this::käynnistäPeli);
+        komennot.put("keskeytä", this::pysäytäPeli);
+        komennot.put("peruuta", this::peruutaSiirto);
+        komennot.put("käännä", this::käännäLauta);
+        komennot.put("alkuasetelma", this::meneAloitusAsetelmaan);
+        komennot.put("tutki", this::tutkiSiirtoja);
+        
+        komennotJärjestyksessä = new String[]
+            {"pelaa", "keskeytä", "peruuta", "käännä", "alkuasetelma", "tutki"};
     }
+    
     
     private void luoOhjausIkkuna(){
         JFrame ohjausIkkuna = new JFrame();
@@ -76,6 +87,7 @@ public class KayttoLiittyma extends JFrame implements ActionListener{
         ohjausIkkuna.setTitle("ShakkiPeli");
         ohjausIkkuna.setVisible(true);
         ohjausIkkuna.setLayout(new BorderLayout());
+        ohjausIkkuna.setLocation(100, 100);
         
         ButtonGroup pelaajaValikko = new ButtonGroup();
         pelaajaValikko.add(ihminenTekoÄly);
@@ -83,28 +95,30 @@ public class KayttoLiittyma extends JFrame implements ActionListener{
         pelaajaValikko.add(tekoÄlyTekoÄly);
         ihminenTekoÄly.setSelected(true);
         
-        String painikkeet[] = {"pelaa", "käännä", "alkuasetelma", "keskeytä", "tutki", "peruuta"};
         JPanel painikeRivi = new JPanel();
-        painikeRivi.setLayout(new GridLayout(0, 1));
+        painikeRivi.setLayout(new GridLayout(0, 1, 5, 0));
+        painikeRivi.setBorder(BorderFactory.createEmptyBorder(7, 7, 7, 7));
         painikeRivi.add(ihminenTekoÄly);
         painikeRivi.add(ihminenIhminen);
         painikeRivi.add(tekoÄlyTekoÄly);
         painikeRivi.add(valitsin);
-
-        for (String teksti : painikkeet) {
-            JButton painike = new JButton(teksti);
-            painikeRivi.add(painike);
-            painike.addActionListener(this);
-        }
         
-        ohjausIkkuna.add(painikeRivi);
+        Stream.of(komennotJärjestyksessä)
+                .map((teksti) -> new JButton(teksti))
+                .peek((painike) -> painike.addActionListener(this))
+                .forEachOrdered(painikeRivi::add);
+        
+        peliTilaPaneeli = new PeliTilaPaneeli();
+        ohjausIkkuna.add(peliTilaPaneeli, BorderLayout.NORTH);
+        ohjausIkkuna.add(painikeRivi, BorderLayout.CENTER);
         ohjausIkkuna.validate();
     }
+    
     
     public void pelaa(){
         if(!onkoPeliKäynnissä()){
             
-            tekoÄly = new TekoÄly(new PositioArviointi(0.0), valitsin.haeHakuAlgoritmi());
+            tekoÄly = new TekoÄly(new PositioArviointi(satunnaisuus), valitsin.haeHakuAlgoritmi());
             
             Pelaaja valkoinen = null;
             Pelaaja musta = null;
@@ -121,30 +135,20 @@ public class KayttoLiittyma extends JFrame implements ActionListener{
                 musta = käyttäjä;
             }else{
                 valkoinen = tekoÄly;
-                musta = new TekoÄly(new PositioArviointi(0.0), new MinMax(3));
+                musta = new TekoÄly(new PositioArviointi(satunnaisuus), new MinMax(3));
             }
+            
             peli = new PelinOhjaus(valkoinen, musta, lauta.haeLauta(), lauta.haePeliTila());
             peli.lisääKatsoja(new PelinLopetusIlmoittaja());
             if(tekoÄlyTekoÄly.isSelected()){
                 peli.lisääKatsoja(käyttäjä);
             }
+            lauta.tyhjennäSiirtoEhdotus();
             peli.pelaa();
         }
     }
     
-    public void tutkiSiirtoja(){
-        tutkimusIkkuna = new HakuPuuSelaaja(lauta);
-        
-        TutkimusAlgoritmi algoritmi = valitsin.haeTutkimusAlgoritmi();
-        ShakkiPeli testiPeli = new ShakkiPeli(lauta.haeLauta(), lauta.haePeliTila());
-        HakuPuu puu = algoritmi.tutki(testiPeli, new PositioArviointi(0.0));
-        tutkimusIkkuna.asetaHakuPuu(puu);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent klikkaus) {
-        String komento = klikkaus.getActionCommand();
-        if(komento.equals("pelaa")){
+    private void käynnistäPeli(){
             (new SwingWorker<Void, Void>() {
                 @Override
                 protected Void doInBackground() throws Exception {
@@ -152,19 +156,52 @@ public class KayttoLiittyma extends JFrame implements ActionListener{
                     return null;
                 }
             }).execute();
-        }else if(komento.equals("tutki") && !onkoPeliKäynnissä()){
-            tutkiSiirtoja();
-        }else if(komento.equals("käännä") && !onkoPeliKäynnissä()){
-            lauta.asetaVäri(!lauta.haeVäri());
-        }else if(komento.equals("alkuasetelma") && !onkoPeliKäynnissä()){
-            lauta.tyhjennäHistoria();
-            lauta.päivitäLauta(AloitusAsetelma.haeLauta(), AloitusAsetelma.haeTila());
-        }else if(komento.equals("keskeytä") && onkoPeliKäynnissä()){
+    }
+    
+    private void pysäytäPeli(){
+        if(onkoPeliKäynnissä()){
             peli.poistaKatsojat();
-            käyttäjä.luovuta();
-            tekoÄly.luovuta();
-        }else if(komento.equals("peruuta") && !onkoPeliKäynnissä()){
+            peli.pysäytäPeli();
+        }
+    }
+    
+    private void peruutaSiirto(){
+        pysäytäPeli();
+        if(lauta.haePeliTila().siirtoNumero > 0){
             lauta.peruutaSiirto();
+            peliTilaPaneeli.päivitä(lauta.haeLauta(), lauta.haePeliTila());
+        }
+    }
+    
+    public void tutkiSiirtoja(){
+        pysäytäPeli();
+        
+        tutkimusIkkuna = new HakuPuuSelaaja(lauta, peliTilaPaneeli);
+        
+        TutkimusAlgoritmi algoritmi = valitsin.haeTutkimusAlgoritmi();
+        ShakkiPeli testiPeli = new ShakkiPeli(lauta.haeLauta(), lauta.haePeliTila());
+        HakuPuu puu = algoritmi.tutki(testiPeli, new PositioArviointi(0.0));
+        tutkimusIkkuna.asetaHakuPuu(puu);
+    }
+    
+    private void meneAloitusAsetelmaan(){
+        pysäytäPeli();
+        lauta.tyhjennäHistoria();
+        lauta.päivitäLauta(AloitusAsetelma.haeLauta(), AloitusAsetelma.haeTila());
+        peliTilaPaneeli.päivitä(lauta.haeLauta(), lauta.haePeliTila());
+    }
+    
+    private void käännäLauta(){
+        pysäytäPeli();
+        lauta.asetaVäri(!lauta.haeVäri());
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent klikkaus) {
+        String nimi = klikkaus.getActionCommand();
+        Runnable komento = komennot.get(nimi);
+        if(komento != null){
+            komento.run();
         }
     }
     

@@ -144,8 +144,8 @@ public class ShakkiPeli{
             nappula = siirto.korotus;
         }
         
-        lauta.asetaRuutu(siirto.kohdeX, siirto.kohdeY, nappula);
         lauta.asetaRuutu(siirto.lähtöX, siirto.lähtöY, null);
+        lauta.asetaRuutu(siirto.kohdeX, siirto.kohdeY, nappula);
         
         if(nappula != null && nappula.tyyppi == KUNINGAS){
             siirräLinnoitusTorni(siirto);

@@ -2,12 +2,10 @@
 package Tutkimus;
 
 
-import java.sql.ResultSet;
 import java.util.List;
 import pelinohjaus.SiirtojenGenerointi;
 import pelinydin.Nappula;
 import static pelinydin.NappulaTyyppi.KUNINGAS;
-import pelinydin.ShakkiLauta;
 import pelinydin.ShakkiPeli;
 import pelinydin.ShakkiSiirto;
 import tekoaly.ArviointiFunktio;
@@ -17,6 +15,7 @@ public class MinMaxTutkimus implements TutkimusAlgoritmi{
     
     private final int hakuSyvyys;
     private int syöntiHakuSyvyys;
+    private boolean pysäytys;
 
     private ShakkiPeli peli;
     private ArviointiFunktio arviointi;
@@ -34,9 +33,9 @@ public class MinMaxTutkimus implements TutkimusAlgoritmi{
     public HakuPuu tutki(ShakkiPeli peli, ArviointiFunktio arviointi) {
         this.arviointi = arviointi;
         this.peli = peli;
+        this.pysäytys = false;
         HakuPuu puu = new HakuPuu(peli.haeLauta(), peli.haePeliTila());
         haku(hakuSyvyys, puu.haeJuuri());
-        
         return puu;
     }
     
@@ -44,20 +43,20 @@ public class MinMaxTutkimus implements TutkimusAlgoritmi{
         Nappula syöty = peli.haePeliTila().syötyNappula;
         if(syöty != null && syöty.tyyppi == KUNINGAS){
             return -10000;
-        }else if(syvyys <= 0 && (syöty == null || syvyys <= -syöntiHakuSyvyys) ){
+        }else if( pysäytys  || (syvyys <= 0 && (syöty == null || syvyys <= -syöntiHakuSyvyys)) ){
             return arviointi.arvioi(peli.haeLauta(), peli.haePeliTila());
         }else{
             List<ShakkiSiirto> siirrot = SiirtojenGenerointi.haeSiirrot(peli.haeLauta(), peli.haePeliTila());
             double paras = -10000;
             
             if(laitonLinnoitus(peli, siirrot)){
-                vanhempi.lisääTagi("LL");
+                //vanhempi.lisääTagi("LL");
                 return LAITON_TOISEN_SIIRTO;
             }
             
             for (ShakkiSiirto siirto : siirrot) {
                 peli.teeSiirto(siirto);
-                PeliSolmu solmu = new PeliSolmu(siirto, 0, vanhempi);
+               PeliSolmu solmu = new PeliSolmu(siirto, 0, vanhempi);
                 double arvo = -haku(syvyys - 1, solmu);
                 solmu.asetaArvo(arvo);
                 if(arvo >= paras){
@@ -70,18 +69,9 @@ public class MinMaxTutkimus implements TutkimusAlgoritmi{
         }
     }
     
-    private boolean kuningasUhattu(ShakkiPeli peli){
-        peli.teeSiirto(new ShakkiSiirto(0, 0, 0, 0));
-        ShakkiLauta lauta = peli.haeLauta();
-        List<ShakkiSiirto> siirrot = SiirtojenGenerointi.haeSiirrot(lauta, peli.haePeliTila());
-        for (ShakkiSiirto siirto : siirrot) {
-            Nappula kohde = lauta.haeRuutu(siirto.kohdeX, siirto.kohdeY);
-            if(kohde != null && kohde.tyyppi == KUNINGAS){
-                peli.peruutaSiirto();
-                return true;
-            }
-        }
-        peli.peruutaSiirto();
-        return false;
+    @Override
+    public void pysäytäHaku(){
+        pysäytys = true;
     }
+    
 }

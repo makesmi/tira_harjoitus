@@ -158,6 +158,7 @@ public class LoppuTarkistus {
             }
         }
         
+        
         peli.peruutaSiirto();
         
         return kuningasUhattu;

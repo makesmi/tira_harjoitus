@@ -17,7 +17,7 @@ import pelinydin.Väri;
 public class NappulaKuvat {
     private static HashMap<NappulaTyyppi, BufferedImage> valkoiset;
     private static HashMap<NappulaTyyppi, BufferedImage> mustat;
-    
+     
     static{
         try {
             lataaKuvat();
@@ -53,18 +53,18 @@ public class NappulaKuvat {
         yhteisKuva = new BufferedImage(leveys, korkeus, BufferedImage.TYPE_INT_ARGB);
         yhteisKuva.createGraphics().drawImage(skaalattu, 0, 0, null);
         
-        mustat.put(TORNI, yhteisKuva.getSubimage(0, 0, koko, koko));
-        mustat.put(RATSU, yhteisKuva.getSubimage(koko, 0, koko, koko));
-        mustat.put(LÄHETTI, yhteisKuva.getSubimage(2*koko, 0, koko, koko));
-        mustat.put(KUNINGATAR, yhteisKuva.getSubimage(3*koko, 0, koko, koko));
-        mustat.put(KUNINGAS, yhteisKuva.getSubimage(4*koko, 0, koko, koko));
-        mustat.put(SOTILAS, yhteisKuva.getSubimage(5*koko, 0, koko, koko));
+        mustat.put(TORNI, yhteisKuva.getSubimage(4*koko, koko, koko, koko));
+        mustat.put(RATSU, yhteisKuva.getSubimage(3*koko, koko, koko, koko));
+        mustat.put(LÄHETTI, yhteisKuva.getSubimage(2*koko, koko, koko, koko));
+        mustat.put(KUNINGATAR, yhteisKuva.getSubimage(koko, koko, koko, koko));
+        mustat.put(KUNINGAS, yhteisKuva.getSubimage(0, koko, koko, koko));
+        mustat.put(SOTILAS, yhteisKuva.getSubimage(5*koko, koko, koko, koko));
         
-        valkoiset.put(TORNI, yhteisKuva.getSubimage(0, koko, koko, koko));
-        valkoiset.put(RATSU, yhteisKuva.getSubimage(koko, koko, koko, koko));
-        valkoiset.put(LÄHETTI, yhteisKuva.getSubimage(2*koko, koko, koko, koko));
-        valkoiset.put(KUNINGATAR, yhteisKuva.getSubimage(3*koko, koko, koko, koko));
-        valkoiset.put(KUNINGAS, yhteisKuva.getSubimage(4*koko, koko, koko, koko));
-        valkoiset.put(SOTILAS, yhteisKuva.getSubimage(5*koko, koko, koko, koko));
+        valkoiset.put(TORNI, yhteisKuva.getSubimage(4*koko, 0, koko, koko));
+        valkoiset.put(RATSU, yhteisKuva.getSubimage(3*koko, 0, koko, koko));
+        valkoiset.put(LÄHETTI, yhteisKuva.getSubimage(2*koko, 0, koko, koko));
+        valkoiset.put(KUNINGATAR, yhteisKuva.getSubimage(koko, 0, koko, koko));
+        valkoiset.put(KUNINGAS, yhteisKuva.getSubimage(0, 0, koko, koko));
+        valkoiset.put(SOTILAS, yhteisKuva.getSubimage(5*koko, 0, koko, koko));
     }
 }

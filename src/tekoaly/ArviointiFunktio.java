@@ -9,7 +9,9 @@ import pelinydin.ShakkiLauta;
 public interface ArviointiFunktio {
     
     /**
-     * Palauttaa arvion tällä hetkellä vuorossa olevan pelaajan kannalta.
+     * Palauttaa arvion pelistä tällä hetkellä vuorossa olevan pelaajan kannalta.
+     * Positiivinen arvo tarkoittaa, että pelaaja on voitolla.
+     * Lähtökohtana arvo 1 vastaan yhtä sotilasta.
      * @param lauta
      * @param tila
      * @return 

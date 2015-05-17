@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 
+import com.sun.prism.ps.Shader;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -345,6 +346,10 @@ public class ShakkiPeliTest {
         assert(peli.haePeliTila().linnoitusMahdollisuudet == Linnoitus.kaikki);
     }
     
+    /**
+     * Siirrot, jotka poistavat linnoitusmahdollisuuksia:
+     */
+    
     @Test 
     public void linnoitusMahdollisuudetValkoinenKuningasSiirtyy(){
         teeSiirrot( // e4, e5, Ke2
@@ -430,6 +435,17 @@ public class ShakkiPeliTest {
         int lm = peli.haePeliTila().linnoitusMahdollisuudet;
         int pitäisiOlla = (Linnoitus.kaikki & (~ Linnoitus.mustaKuningas ));
         assert(lm == pitäisiOlla);
+    }
+    
+    @Test
+    public void tyhjäSiirto(){
+        //lähtöruutuun siirrettäessä se ei saa tulla tyhjäksi
+        
+        teeSiirrot(new ShakkiSiirto(0, 0, 0, 0));
+        Nappula nappulaNurkassa = peli.haeLauta().haeRuutu(0, 0);
+        Nappula sotilas = new Nappula(TORNI, VALKOINEN); 
+                
+        assert(samanlainenNappula(nappulaNurkassa, sotilas));
     }
     
     private void valkeanOhestaLyöntiAsetelma(){

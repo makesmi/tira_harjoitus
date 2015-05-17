@@ -13,12 +13,14 @@ import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import pelinohjaus.SiirtojenGenerointi;
+import pelinohjaus.SiirtojenTarkistus;
 import pelinydin.AloitusAsetelma;
 import pelinydin.Nappula;
 import pelinydin.NappulaTyyppi;
@@ -29,6 +31,7 @@ import static pelinydin.NappulaTyyppi.SOTILAS;
 import static pelinydin.NappulaTyyppi.TORNI;
 import pelinydin.PeliTila;
 import pelinydin.ShakkiLauta;
+import pelinydin.ShakkiPeli;
 import pelinydin.ShakkiSiirto;
 import pelinydin.Väri;
 import static pelinydin.Väri.VALKOINEN;
@@ -40,12 +43,13 @@ public class PeliLauta extends JPanel implements MouseListener, MouseMotionListe
     private final Color vaalea = new Color(230, 230, 200);
     private final Color vihjeVäri = new Color(240, 40, 40);
     
-    public static final int ruutuKoko = 80;
+    public static final int ruutuKoko = 82;
     private ShakkiLauta lauta;
     private PeliTila peliTila;
     private boolean väri;
     private boolean vihjeidenNäyttö;
     
+    private boolean siirtoaPyydetty;
     private Nappula siirtoNappula;
     private int siirtoX, siirtoY;
     private int hiiriX, hiiriY;
@@ -69,11 +73,18 @@ public class PeliLauta extends JPanel implements MouseListener, MouseMotionListe
         siirtoKuuntelija = null;
         vihjeet = new LinkedList<>();
         vihjeidenNäyttö = false;
+        siirtoaPyydetty = false;
     }
     
     public ShakkiSiirto haeSiirto(){
         ShakkiSiirto siirto = ehdotettuSiirto;
-        ehdotettuSiirto = null;
+        if(siirto != null){
+            ehdotettuSiirto = null;
+            siirtoNappula = null;
+            siirtoaPyydetty = false;
+        }else{
+            siirtoaPyydetty = true;
+        }
         return siirto;
     }
     
@@ -97,13 +108,7 @@ public class PeliLauta extends JPanel implements MouseListener, MouseMotionListe
         repaint();
     }
     
-    private void tallennaHistoriaan(){
-        ShakkiLauta lautaKopio = new ShakkiLauta();
-        lautaKopio.kopioiAsetelma(lauta);
-        lautaHistoria.push(lautaKopio);
-        tilaHistoria.push(peliTila);
-    }
-    
+
     public void peruutaSiirto(){
         if(!lautaHistoria.isEmpty() && !tilaHistoria.isEmpty()){
             this.lauta = lautaHistoria.pop();
@@ -117,11 +122,22 @@ public class PeliLauta extends JPanel implements MouseListener, MouseMotionListe
         tilaHistoria.clear();
     }
     
+    public void tyhjennäSiirtoEhdotus(){
+        ehdotettuSiirto = null;
+    }
+    
     public void näytäSiirtoVihjeet(boolean näytä){
         vihjeidenNäyttö = näytä;
     }
-       
-    public void käsitteleSiirto(){
+
+     private void tallennaHistoriaan(){
+        ShakkiLauta lautaKopio = new ShakkiLauta();
+        lautaKopio.kopioiAsetelma(lauta);
+        lautaHistoria.push(lautaKopio);
+        tilaHistoria.push(peliTila);
+    }       
+    
+    private void käsitteleSiirto(){
         int keskiX = hiiriX - siirtoX + ruutuKoko / 2;
         int keskiY = hiiriY - siirtoY + ruutuKoko / 2;
         int x = keskiX / ruutuKoko;
@@ -140,7 +156,10 @@ public class PeliLauta extends JPanel implements MouseListener, MouseMotionListe
             ehdotettuSiirto = new ShakkiSiirto(lähtöRuutuX, lähtöRuutuY, x, y, korotus);
         }
         
-        siirtoNappula = null;
+        if(!siirtoaPyydetty){
+            siirtoNappula = null;
+        }
+        
         repaint();
     }
     
@@ -232,6 +251,11 @@ public class PeliLauta extends JPanel implements MouseListener, MouseMotionListe
                 }
             }
             vihjeet.removeAll(poistettavat);
+            ShakkiPeli testiPeli = new ShakkiPeli(lauta, peliTila);
+            SiirtojenTarkistus tarkistus = new SiirtojenTarkistus(testiPeli);
+            vihjeet = vihjeet.stream()
+                    .filter(tarkistus::onkoLaillinen)
+                    .collect(Collectors.toList());
         }else{
             vihjeet = new LinkedList<>();
         }        

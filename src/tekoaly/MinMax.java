@@ -3,19 +3,17 @@ package tekoaly;
 
 import java.util.List;
 import pelinohjaus.SiirtojenGenerointi;
-import pelinohjaus.UhkausTarkistus;
 import pelinydin.Nappula;
 import static pelinydin.NappulaTyyppi.KUNINGAS;
-import pelinydin.ShakkiLauta;
 import pelinydin.ShakkiPeli;
 import pelinydin.ShakkiSiirto;
 
 
 public class MinMax implements HakuAlgoritmi{
     
-    
     private final int hakuSyvyys;
     private int syöntiHakuSyvyys = 2;
+    private boolean pysäytys;
 
     private ShakkiPeli peli;
     private ArviointiFunktio arviointi;
@@ -34,6 +32,7 @@ public class MinMax implements HakuAlgoritmi{
     public ShakkiSiirto haku(ShakkiPeli peli, ArviointiFunktio arviointi) {
         this.arviointi = arviointi;
         this.peli = peli;
+        this.pysäytys = false;
         parasSiirto = null;
         haku(hakuSyvyys);
         return parasSiirto;
@@ -43,7 +42,7 @@ public class MinMax implements HakuAlgoritmi{
         Nappula syöty = peli.haePeliTila().syötyNappula;
         if(syöty != null && syöty.tyyppi == KUNINGAS){
             return LAITON_SIIRTO;
-        }else if(syvyys <= 0 && (syöty == null || syvyys <= -2)){
+        }else if(pysäytys || (syvyys <= 0 && (syöty == null || syvyys <= -syöntiHakuSyvyys))){
             return arviointi.arvioi(peli.haeLauta(), peli.haePeliTila());
         }else{
             List<ShakkiSiirto> siirrot = SiirtojenGenerointi.haeSiirrot(peli.haeLauta(), peli.haePeliTila());
@@ -68,4 +67,9 @@ public class MinMax implements HakuAlgoritmi{
             return tarkistettuArvo(paras, peli);
         }
     }    
+    
+    @Override
+    public void pysäytäHaku(){
+        pysäytys = true;
+    }
 }

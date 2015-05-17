@@ -14,6 +14,7 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import kayttoliittyma.PeliLauta;
+import kayttoliittyma.PeliTilaPaneeli;
 import pelinydin.Nappula;
 import pelinydin.ShakkiPeli;
 import pelinydin.ShakkiSiirto;
@@ -27,7 +28,8 @@ public class HakuPuuSelaaja extends JPanel implements MouseListener, MouseWheelL
     
     private final JFrame ikkuna;
     private final PeliLauta lauta;
-    private List<SelausSolmu> solmut = new LinkedList<>();
+    private final PeliTilaPaneeli tilaPaneeli;
+    private final List<SelausSolmu> solmut = new LinkedList<>();
     private final int solmuLeveys = 150;
     private final int solmuKorkeus = 25;
     private final int näytäVanhempia = 2;
@@ -43,15 +45,16 @@ public class HakuPuuSelaaja extends JPanel implements MouseListener, MouseWheelL
     private int yPaikka = 0;
     
     
-    public HakuPuuSelaaja(PeliLauta lauta){
+    public HakuPuuSelaaja(PeliLauta lauta, PeliTilaPaneeli tilaPaneeli){
         this.lauta = lauta;
-        ikkuna = new JFrame("pelipuun selaaminen");
+        ikkuna = new JFrame("pelipuu - ODOTA...");
         ikkuna.setSize(ikkunaLeveys, ikkunaKorkeus);
         ikkuna.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         ikkuna.setVisible(true);
         ikkuna.add(this);
         this.addMouseListener(this);
         ikkuna.addMouseWheelListener(this);
+        this.tilaPaneeli = tilaPaneeli;
     }
     
     public void asetaHakuPuu(HakuPuu puu){
@@ -109,6 +112,8 @@ public class HakuPuuSelaaja extends JPanel implements MouseListener, MouseWheelL
         yPaikka = 0;
         repaint();
         lauta.päivitäLauta(peli.haeLauta(), peli.haePeliTila());
+        tilaPaneeli.asetaPeliKäynnissä(false);
+        tilaPaneeli.päivitä(peli.haeLauta(), peli.haePeliTila());
     }
     
     private String haeNotaatio(ShakkiPeli peli, ShakkiSiirto siirto){

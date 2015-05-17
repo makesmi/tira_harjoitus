@@ -15,6 +15,7 @@ public class MinMaxAlfaBeta implements HakuAlgoritmi{
 
     private final int hakuSyvyys;
     private int syöntiHakuSyvyys = 2;
+    private boolean pysäytys;
 
     private ShakkiPeli peli;
     private ArviointiFunktio arviointi;
@@ -32,6 +33,7 @@ public class MinMaxAlfaBeta implements HakuAlgoritmi{
     public ShakkiSiirto haku(ShakkiPeli peli, ArviointiFunktio arviointi) {
         this.arviointi = arviointi;
         this.peli = peli;
+        this.pysäytys = false;
         parasSiirto = null;
         haku(hakuSyvyys, -10000, 10000);
         return parasSiirto;
@@ -41,7 +43,7 @@ public class MinMaxAlfaBeta implements HakuAlgoritmi{
         Nappula syöty = peli.haePeliTila().syötyNappula;
         if(syöty != null && syöty.tyyppi == KUNINGAS){
             return -10000;
-        }else if(syvyys <= 0 && (syöty == null || syvyys <= -syöntiHakuSyvyys) ){
+        }else if(pysäytys || (syvyys <= 0 && (syöty == null || syvyys <= -syöntiHakuSyvyys)) ){
             return arviointi.arvioi(peli.haeLauta(), peli.haePeliTila());
         }else{
             List<ShakkiSiirto> siirrot = SiirtojenGenerointi.haeSiirrot(peli.haeLauta(), peli.haePeliTila());
@@ -68,5 +70,10 @@ public class MinMaxAlfaBeta implements HakuAlgoritmi{
             parasSiirto = valittuSiirto;
             return tarkistettuArvo(alfa, peli);
         }
+    }
+    
+    @Override
+    public void pysäytäHaku(){
+        pysäytys = true;
     }
 }
