@@ -1,8 +1,9 @@
-# tira_harjoitus
+Käyttöohje:
+
+ShakkiPeli.jar-tiedosto täytyy olla samassa hakemistossa kuvat-hakemison kanssa, jotta nappuloiden kuvat latautuvat oikein. Varmista, että javan (jre) versio 8 on asennettuna. Voit ajaa jar-tiedoston seuraavalla komennolla samansta hakemistosta:
+
+java -jar shakkipeli.jar
+
+Ohjelmaan kuuluu shakkilauta-ikkuna ja ohjausikkuna. Pelin voi käynnistää pelaa-painikkeesta. Valitse pelaajat ennen pelin käynnistämistä. Voit valita tekoälyn hakualgoritmin ja hakusyvyyden. Huomaa, että esimerkiksi pelkkä minmax-algoritmi syvyydellä 6 on liian hidas pelattavaksi. Huomaa että tekoälyllä toisten siirtojen laskeminen voi kestää pitempään kuin toisten. Pelin loppumisesta tulee ilmoitus ponnahdusikkunaan, jossa kerrotaan loppumisen syy, esimerkiksi "valkoinen voitti - shakkimatti". Pelin voi keskeyttää milloin tahansa painamalla keskeytä-painiketta. Tämä pysäyttää myös kesken olevan hakualgoritmin haun. Peli keskeytyy myös silloin kun lauta käännetään. "ihminen vs tekoäly"-moodissa käyttäjä pelaa alapuolella olevilla nappuloilla ja tekoäly yläpuolella olevilla. Voit siirtää nappuloita vetämällä hiirellä. Siirrettäessä näytetään mahdolliset siirrot punaisina neliöinä. Möys siirtojen peruminen keskeyttää pelin. Pelaa-painiketta painettaessa peli jatkuu aina laudan tämänhetkisestä asetelmasta. Kun haluat testata tekoäly tietyssä asetelmassa, valitse ihminen vs. ihminen, käynnistä peli, sitten tee siirtoja saadaksesi asetelma laudalle ja keskeytä peli. Sen jälkeen voit käynnistää pelin tekoälyn kanssa. Tutki-painikkeesta voit ajaa algoritmista sellaisen version, joka tallentaa pelipuun ja sen jälkeen pelipuu tulee väkyviin omaan ikkunaan. Voit liikkua pelipuussa valitsemalla hiirellä solmuja. Valitut siirrot päivittyvät pelilauta-ikkunaan. Pelipuun solmujen määrä, sekä keskimääräinen haaroituskerroin näkyvät ikkunan otsikossa. Merkintä BK pelipuun solmussa tarkoittaa, että siinä kohtaa on tapahtunut beta-katkaisu alfa-beta-algoritmissa. Pelipuusta voit nähdä kuinka syöviä siirtoja haetaan syvemmälle.
 
 
-vÃ¤liaikainen kÃ¤yttÃ¶-ohje:
-
-KÃ¤yttÃ¶liittymÃ¤ssÃ¤ voit valita tekoÃ¤lyn hakualgoritmiksi joko pelkÃ¤n minmaxin tai alfabeta-karsinnan. Sitten voit valita hakusyvyyden. Minmax-algoritmia ei kannata kokeilla hakusyvyydellÃ¤ 6, koska se on toivottoman hidas.
-Voit aloittaa pelin ja keskeyttÃ¤Ã¤ pelin milloin tahansa. Peli alkaa aina laudalla olevasta asetelmasta. Saat haluamasi asetelman laudalle valitsemalla ihminen vs ihminen ja kÃ¤ynnistÃ¤mÃ¤llÃ¤ pelin. Kun peli ei ole kÃ¤ynnissÃ¤,
-voi laudan kÃ¤Ã¤ntÃ¤Ã¤ ja algoritmin antamaa pelipuuta tutkia. Pelipuun selaamisikkunassa voit hiirellÃ¤ klikkaamalla mennÃ¤ siirtoja vastaaviin solmuihin, jolloin siirrot tapahtuvat automaattisesti laudalla. Pelipuun selaamisikkunan otsikossa nÃ¤kyy, montako solmua yhteensÃ¤ on haettu ja mikÃ¤ on keskimÃ¤Ã¤rÃ¤inen haarautumiskerroin.
